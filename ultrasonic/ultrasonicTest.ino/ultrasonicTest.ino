@@ -88,16 +88,16 @@ void loop() {
 
     // let this part as commented for less delay ---------------------------------------------
 
-    int mtr1, mtr2, fs = 1, bs = 1, fsmin=5, bsmin=5, fsmx=30, bsmx=30;
+    int mtr1, mtr2, fs=1, bs=1, fsmin, bsmin, fsmx, bsmx;
 
     if (Firebase.RTDB.getInt(&fbdo, "variables/Motor1/val")) {
       if (fbdo.dataType() == "int") {
-        mtr1 = fbdo.intData();
+         mtr1 = fbdo.intData();
       }
     }
     if (Firebase.RTDB.getInt(&fbdo, "variables/Motor2/val")) {
       if (fbdo.dataType() == "int") {
-        mtr2 = fbdo.intData();
+         mtr2 = fbdo.intData();
       }
     }
     // if (Firebase.RTDB.getInt(&fbdo, "variables/bsensor/val")) {
@@ -149,17 +149,36 @@ void loop() {
     long duration2 = pulseIn(ECHO_PIN2, bs);
     float distance2 = duration2 * 0.034 / 2;
 
-    if (distance < fsmx && distance > fsmin) {
-      digitalWrite(MOTOR1, mtr1);
-      digitalWrite(MOTOR2, mtr2);
-      Firebase.RTDB.setFloat(&fbdo, "ultrasonic/distance", distance);
+    digitalWrite(MOTOR1, mtr1);
+    digitalWrite(MOTOR2, mtr2);
+
+    if (Firebase.RTDB.setFloat(&fbdo, "ultrasonic/distance", distance)) {
+
+      //      Serial.println("PASSED");
+      Serial.print("Distance: ");
+      Serial.print(distance);
+      Serial.println(" cm");
+
+    } else {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + fbdo.errorReason());
     }
 
-    if (distance2 < bsmx && distance2 > bsmin) {
-      Firebase.RTDB.setFloat(&fbdo, "ultrasonic2/distance", distance2);
+    if (Firebase.RTDB.setFloat(&fbdo, "ultrasonic2/distance", distance2)) {
+
+      //      Serial.println("PASSED");
+      Serial.print("Distance: ");
+      Serial.print(distance2);
+      Serial.println(" cm");
+
+    } else {
+      Serial.println("FAILED");
+      Serial.println("REASON: " + fbdo.errorReason());
     }
 
-  } 
-      digitalWrite(MOTOR1, LOW);
-      digitalWrite(MOTOR2, LOW);
+    
+  } else {
+  }
+
+  Serial.println("______________________________");
 }
